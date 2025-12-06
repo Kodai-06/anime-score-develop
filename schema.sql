@@ -7,11 +7,13 @@ CREATE TABLE users (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 2. Animesテーブル (タイトルと放送年のみ)
+-- 2. Animesテーブル (Annict APIデータのキャッシュ)
 CREATE TABLE animes (
     id SERIAL PRIMARY KEY,
+    annictId INTEGER UNIQUE NOT NULL,   -- Annict API の作品ID
     title VARCHAR(255) NOT NULL,
-    year INTEGER NOT NULL,          -- 放送年 (例: 2024)
+    year INTEGER NOT NULL,              -- 放送年 (例: 2024)
+    image_url VARCHAR(500),             -- 作品画像URL (Annict APIから取得)
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -27,7 +29,14 @@ CREATE TABLE reviews (
     -- 1ユーザー1アニメにつき1レビューのみの制約
     UNIQUE(user_id, anime_id)
 );
--- アニメごとの統計情報を表示するビュー
+
+-- 4. インデックス (クエリパフォーマンス向上)
+CREATE INDEX idx_reviews_user_id ON reviews(user_id);
+CREATE INDEX idx_reviews_anime_id ON reviews(anime_id);
+CREATE INDEX idx_animes_title ON animes(title);
+CREATE INDEX idx_animes_annictId ON animes(annictId);
+
+-- 5. アニメごとの統計情報を表示するビュー
 CREATE VIEW anime_stats AS
 SELECT 
     anime_id,
