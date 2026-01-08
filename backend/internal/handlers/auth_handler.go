@@ -17,6 +17,7 @@ func NewAuthHandler(service *services.AuthService) *AuthHandler {
 }
 
 // Signup ハンドラー
+// c.ShouldBindJSON(&input) はリクエストボディのJSONを構造体にマッピングしている
 func (h *AuthHandler) Signup(c *gin.Context) {
 	var input models.SignUpInput
 	if err := c.ShouldBindJSON(&input); err != nil {

@@ -4,6 +4,7 @@ import (
 	"anime-score-backend/internal/models"
 	"anime-score-backend/internal/repositories"
 	"errors"
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -42,6 +43,11 @@ func (s *AuthService) Signup(input models.SignUpInput) (*models.User, error) {
 }
 
 // Login: ログインロジック（JWTトークンを返す）
+// JWTは
+// Header（ヘッダー）: 暗号化方式などの情報
+// Payload（ペイロード）: ユーザーIDや有効期限などのデータ(暗号化されていないので機密情報は入れないこと)
+// Signature（署名）: シークレットキーを使って生成された暗号データ
+// で構成される
 func (s *AuthService) Login(input models.LoginInput) (string, error) {
 	// 1. Emailでユーザー検索
 	user, err := s.repo.GetByEmail(input.Email)
@@ -61,8 +67,9 @@ func (s *AuthService) Login(input models.LoginInput) (string, error) {
 		"exp":     time.Now().Add(time.Hour * 72).Unix(), // 72時間有効
 	})
 
-	// 秘密鍵で署名（本来は環境変数から読み込むべきですが、今は仮の文字列で）
-	tokenString, err := token.SignedString([]byte("YOUR_SECRET_KEY"))
+	// 秘密鍵で署名（環境変数から読み込む）
+	secret_key := os.Getenv("JWT_SECRET_KEY")
+	tokenString, err := token.SignedString([]byte(secret_key))
 	if err != nil {
 		return "", err
 	}

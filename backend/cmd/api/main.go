@@ -9,21 +9,25 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib" // pgxドライバー
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
+
+	"anime-score-backend/internal/handlers"
+	"anime-score-backend/internal/repositories"
+	"anime-score-backend/internal/services"
 )
 
 func main() {
-	// 1. .envファイルの読み込み
+	// .envファイルの読み込み
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found")
 	}
 
-	// 2. データベース接続
-	dbUrl := os.Getenv("DB_URL")
-	if dbUrl == "" {
-		log.Fatal("DB_URL is not set in .env")
+	// データベース接続
+	dsn := os.Getenv("DSN")
+	if dsn == "" {
+		log.Fatal("DSN is not set in .env")
 	}
 
-	db, err := sqlx.Connect("pgx", dbUrl)
+	db, err := sqlx.Connect("pgx", dsn)
 	if err != nil {
 		log.Fatalln("Failed to connect to database:", err)
 	}
@@ -35,8 +39,30 @@ func main() {
 	}
 	log.Println("Successfully connected to database!")
 
-	// 3. Ginルーターのセットアップ
+	// Ginルーターのセットアップ
 	r := gin.Default()
+
+	// 依存関係の注入 (DI)
+
+	// 認証関連
+	userRepo := repositories.NewUserRepository(db)
+	authService := services.NewAuthService(userRepo)
+	authHandler := handlers.NewAuthHandler(authService)
+
+	// アニメ検索関連
+	annictRepo := repositories.NewAnnictRepository(os.Getenv("ANNICT_ACCESS_TOKEN"))
+	animeService := services.NewAnimeService(annictRepo)
+	animeHandler := handlers.NewAnimeHandler(animeService)
+
+	// ルーティング
+	api := r.Group("/api")
+	{
+		api.POST("/signup", authHandler.Signup)
+		api.POST("/login", authHandler.Login)
+
+		// アニメ検索エンドポイント (GET /api/animes/search)
+		api.GET("/animes/search", animeHandler.Search)
+	}
 
 	// ヘルスチェック用エンドポイント
 	r.GET("/health", func(c *gin.Context) {
@@ -46,7 +72,7 @@ func main() {
 		})
 	})
 
-	// 4. サーバー起動
+	// サーバー起動
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
