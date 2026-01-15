@@ -6,14 +6,14 @@ services:
     image: postgres:15-alpine
     container_name: anime_db
     ports:
-      - "5432:5432"
+      - "5432:5432" # ホストのポート:コンテナのポート
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_DB: ${POSTGRES_DB} # 作成するデータベース名
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./db:/docker-entrypoint-initdb.d # dbフォルダにあるテーブル設計を適用
+      - ./initdb:/docker-entrypoint-initdb.d # dbフォルダにあるテーブル設計を適用
 
 #   # データベース管理ツール (PgAdmin) - オプションですがあると便利です
 #   pgadmin:

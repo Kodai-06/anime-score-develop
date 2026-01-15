@@ -1,13 +1,13 @@
--- 1. Usersテーブル (変更なし想定)
+--  Usersテーブル 
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
-    username VARCHAR(50) NOT NULL,
+    username VARCHAR(50) UNIQUE NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 2. Animesテーブル (Annict APIデータのキャッシュ)
+--  Animesテーブル (Annict APIデータのキャッシュ)
 CREATE TABLE animes (
     id SERIAL PRIMARY KEY,
     annictId INTEGER UNIQUE NOT NULL,   -- Annict API の作品ID
@@ -17,7 +17,7 @@ CREATE TABLE animes (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 3. Reviewsテーブル (0-100点, コメント任意)
+--  Reviewsテーブル (0-100点, コメント任意)
 CREATE TABLE reviews (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -30,13 +30,13 @@ CREATE TABLE reviews (
     UNIQUE(user_id, anime_id)
 );
 
--- 4. インデックス (クエリパフォーマンス向上)
+--  インデックス (クエリパフォーマンス向上)
 CREATE INDEX idx_reviews_user_id ON reviews(user_id);
 CREATE INDEX idx_reviews_anime_id ON reviews(anime_id);
 CREATE INDEX idx_animes_title ON animes(title);
 CREATE INDEX idx_animes_annictId ON animes(annictId);
 
--- 5. アニメごとの統計情報を表示するビュー
+--  アニメごとの統計情報を表示するビュー
 CREATE VIEW anime_stats AS
 SELECT 
     anime_id,

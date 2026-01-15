@@ -21,20 +21,34 @@ func NewAuthService(repo *repositories.UserRepository) *AuthService {
 
 // Signup: ユーザー登録ロジック
 func (s *AuthService) Signup(input models.SignUpInput) (*models.User, error) {
-	// 1. パスワードをハッシュ化
+	// 1. ユーザー名のバリデーション（英数字と記号のみ）
+	if !models.ValidateUsername(input.Username) {
+		return nil, errors.New("ユーザー名は3〜50文字の英数字と記号(_-.)のみ使用できます")
+	}
+
+	// 2. ユーザー名の重複チェック
+	exists, err := s.repo.ExistsByUsername(input.Username)
+	if err != nil {
+		return nil, err
+	}
+	if exists {
+		return nil, errors.New("このユーザー名は既に使用されています")
+	}
+
+	// 3. パスワードをハッシュ化
 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err
 	}
 
-	// 2. ユーザーモデル作成
+	// 4. ユーザーモデル作成
 	user := &models.User{
 		Username:     input.Username,
 		Email:        input.Email,
 		PasswordHash: string(hashedPass),
 	}
 
-	// 3. DBに保存
+	// 5. DBに保存
 	if err := s.repo.Create(user); err != nil {
 		return nil, err
 	}
