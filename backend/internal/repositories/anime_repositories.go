@@ -5,14 +5,16 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type AnimeRepository struct {
-	db *sql.DB
+	db *sqlx.DB
 }
 
 // NewAnimeRepository はDB接続を受け取ってリポジトリを生成する
-func NewAnimeRepository(db *sql.DB) *AnimeRepository {
+func NewAnimeRepository(db *sqlx.DB) *AnimeRepository {
 	return &AnimeRepository{db: db}
 }
 

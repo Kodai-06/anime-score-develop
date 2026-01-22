@@ -51,7 +51,8 @@ func main() {
 
 	// アニメ検索関連
 	annictRepo := repositories.NewAnnictRepository(os.Getenv("ANNICT_ACCESS_TOKEN"))
-	animeService := services.NewAnimeService(annictRepo)
+	animeRepo := repositories.NewAnimeRepository(db)
+	animeService := services.NewAnimeService(annictRepo, animeRepo)
 	animeHandler := handlers.NewAnimeHandler(animeService)
 
 	// ルーティング
