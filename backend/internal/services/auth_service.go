@@ -23,7 +23,7 @@ func NewAuthService(repo *repositories.UserRepository) *AuthService {
 func (s *AuthService) Signup(input models.SignUpInput) (*models.User, error) {
 	// 1. ユーザー名のバリデーション（英数字と記号のみ）
 	if !models.ValidateUsername(input.Username) {
-		return nil, errors.New("ユーザー名は3〜50文字の英数字と記号(_-.)のみ使用できます")
+		return nil, errors.New("ユーザー名は3〜50文字までで英数字とアンダースコア(_)、ハイフン(-)のみ使用できます")
 	}
 
 	// 2. ユーザー名の重複チェック

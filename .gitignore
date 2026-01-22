@@ -69,3 +69,6 @@ $RECYCLE.BIN/
 *.tmp
 *.temp
 .cache/
+
+# Others
+*.md

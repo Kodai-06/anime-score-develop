@@ -11,16 +11,17 @@ type AnimeRepository struct {
 	db *sql.DB
 }
 
-// NewAnimeRepository はDB接続を受け取ってリポジトリを生成します
+// NewAnimeRepository はDB接続を受け取ってリポジトリを生成する
 func NewAnimeRepository(db *sql.DB) *AnimeRepository {
 	return &AnimeRepository{db: db}
 }
 
-// Create はアニメ情報をDBに保存し、生成されたIDを返します
+// Create はアニメ情報をDBに保存し、生成されたIDを返する
 // ON CONFLICT (annict_id) DO NOTHING を使うことで、
-// 万が一同時に同じアニメが保存されようとしてもエラーにならず、既存のIDを返すようにすると堅牢です
+// 万が一同時に同じアニメが保存されようとしてもエラーにならず、既存のIDを返すようにすると堅牢
 func (r *AnimeRepository) Create(anime *models.Anime) error {
 	// 重複チェックも兼ねたINSERT（Upsert的な挙動）
+	// annict_idが既に存在する場合はtitleを更新するだけにする
 	// IDを返すために RETURNING id を使用
 	query := `
 		INSERT INTO animes (annict_id, title, year, image_url)
@@ -46,10 +47,11 @@ func (r *AnimeRepository) Create(anime *models.Anime) error {
 	return nil
 }
 
-// FindByAnnictID はAnnictID（外部ID）を使ってDBからアニメを探します
-// レビュー投稿時に「このアニメは既にDBにあるか？」を調べるのに使います
+// FindByAnnictID はAnnictID（外部ID）を使ってDBからアニメを探す
+// レビュー投稿時に「このアニメは既にDBにあるか？」を調べるのに使う
 func (r *AnimeRepository) FindByAnnictID(annictID int) (*models.Anime, error) {
-	query := `SELECT id, annict_id, title, year, image_url, created_at FROM animes WHERE annict_id = $1`
+	query := `SELECT id, annict_id, title, year, image_url, created_at 
+	          FROM animes WHERE annict_id = $1`
 
 	var anime models.Anime
 	err := r.db.QueryRow(query, annictID).Scan(
@@ -61,6 +63,9 @@ func (r *AnimeRepository) FindByAnnictID(annictID int) (*models.Anime, error) {
 		&anime.CreatedAt,
 	)
 
+	// sql.ErrNoRowsは検索結果が0件の場合の特別なエラー変数
+	// errors.Isでエラーの種類を判定している
+	// データがないことをエラーとせず、nilを返すようにする
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil // 見つからない場合はnilを返す

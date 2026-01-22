@@ -18,6 +18,8 @@ type AnnictRepository struct {
 	client *http.Client // HTTP リクエスト送信用クライアント
 }
 
+// http.Client は Go の標準ライブラリで提供される HTTP クライアントで、
+// HTTP リクエストの送信とレスポンスの受信を行うための構造体。
 // NewAnnictRepository はリポジトリのインスタンスを作成
 func NewAnnictRepository(token string) *AnnictRepository {
 	return &AnnictRepository{
@@ -106,6 +108,7 @@ func (r *AnnictRepository) SearchWorks(keyword string, limit int, afterCursor st
 	}
 
 	// レスポンスボディをパース
+	// resp.Bodyはストリーム（バイト列が流れてくる状態）なので、そのまままでは使えない
 	// graphQLRespにレスポンスをマッピングしている
 	var graphQLResp models.AnnictGraphQLResponse
 	if err := json.NewDecoder(resp.Body).Decode(&graphQLResp); err != nil {
@@ -126,4 +129,63 @@ func (r *AnnictRepository) SearchWorks(keyword string, limit int, afterCursor st
 
 	// 検索結果とカーソルを返す
 	return graphQLResp.Data.SearchWorks.Nodes, nextCursor, nil
+}
+
+// GetWorkByID はAnnict IDを指定してアニメ詳細を取得します
+func (r *AnnictRepository) GetWorkByID(annictID int) (*models.AnnictWork, error) {
+	// annictIds 引数を使ってID指定で検索
+	query := `
+		query GetWork($annictId: Int!) {
+			searchWorks(annictIds: [$annictId], first: 1) {
+				nodes {
+					annictId
+					title
+					seasonYear
+					image {
+						recommendedImageUrl
+					}
+				}
+			}
+		}
+	`
+
+	requestBody, err := json.Marshal(map[string]interface{}{
+		"query": query,
+		"variables": map[string]interface{}{
+			"annictId": annictID,
+		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	req, err := http.NewRequest("POST", annictEndpoint, bytes.NewBuffer(requestBody))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("Authorization", "Bearer "+r.token)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := r.client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("annict api error: %d", resp.StatusCode)
+	}
+
+	var graphQLResp models.AnnictGraphQLResponse
+	if err := json.NewDecoder(resp.Body).Decode(&graphQLResp); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	nodes := graphQLResp.Data.SearchWorks.Nodes
+	if len(nodes) == 0 {
+		return nil, fmt.Errorf("anime not found with annictId: %d", annictID)
+	}
+
+	// 最初の1件を返す
+	return &nodes[0], nil
 }

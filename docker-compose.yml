@@ -13,7 +13,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB} # 作成するデータベース名
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./initdb:/docker-entrypoint-initdb.d # dbフォルダにあるテーブル設計を適用
+      - ./initdb:/docker-entrypoint-initdb.d # initdbフォルダにあるテーブル設計を適用
 
 #   # データベース管理ツール (PgAdmin) - オプションですがあると便利です
 #   pgadmin:
