@@ -11,3 +11,10 @@ type Review struct {
 	Comment   *string   `db:"comment" json:"comment"`
 	CreatedAt time.Time `db:"created_at" json:"createdAt"`
 }
+
+// ReviewInput はレビュー投稿時の入力データ
+type ReviewInput struct {
+	AnnictID int     `json:"annictId" binding:"required"` // Annict APIのアニメID
+	Score    int     `json:"score" binding:"required,min=0,max=100"`
+	Comment  *string `json:"comment"`
+}

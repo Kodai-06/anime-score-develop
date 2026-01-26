@@ -11,6 +11,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"anime-score-backend/internal/handlers"
+	"anime-score-backend/internal/middleware"
 	"anime-score-backend/internal/repositories"
 	"anime-score-backend/internal/services"
 )
@@ -55,7 +56,14 @@ func main() {
 	animeService := services.NewAnimeService(annictRepo, animeRepo)
 	animeHandler := handlers.NewAnimeHandler(animeService)
 
+	// レビュー関連
+	reviewRepo := repositories.NewReviewRepository(db)
+	reviewService := services.NewReviewService(reviewRepo, animeService)
+	reviewHandler := handlers.NewReviewHandler(reviewService)
+
 	// ルーティング
+	// 階層をずらさなくても動作はするが、可読性のためにインデントをつけている
+	// また、Goでは{}で囲むとスコープが作られるため、誤って変数が外に漏れるのを防げる
 	api := r.Group("/api")
 	{
 		api.POST("/signup", authHandler.Signup)
@@ -63,6 +71,14 @@ func main() {
 
 		// アニメ検索エンドポイント (GET /api/animes/search)
 		api.GET("/animes/search", animeHandler.Search)
+
+		// 認証が必要なエンドポイント
+		authorized := api.Group("")
+		authorized.Use(middleware.AuthMiddleware())
+		{
+			// レビュー投稿 (POST /api/reviews)
+			authorized.POST("/reviews", reviewHandler.Create)
+		}
 	}
 
 	// ヘルスチェック用エンドポイント

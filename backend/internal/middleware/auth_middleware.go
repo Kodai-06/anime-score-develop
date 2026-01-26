@@ -64,6 +64,8 @@ func AuthMiddleware() gin.HandlerFunc {
 			// float64型にしないとint()を使えない
 			// claims["user_id"]のuser_idはJWT生成時にペイロードに設定したキー
 			if userID, ok := claims["user_id"].(float64); ok {
+				// c.set(key string, value any) でコンテキストに値を保存する
+				// 後のハンドラーで c.Get("userID") として取得可能
 				c.Set("userID", int(userID))
 			} else {
 				c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
