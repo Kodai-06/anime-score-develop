@@ -33,7 +33,9 @@ func (h *AnimeHandler) Search(c *gin.Context) {
 		return
 	}
 
+	// クエリパラメータは文字列なので
 	// limitを数値に変換（失敗したらデフォルト値を使うなどの安全策）
+	// AtoiはASCII to Integer
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil {
 		limit = 15

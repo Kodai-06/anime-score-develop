@@ -18,3 +18,5 @@ type AnimeStats struct {
 	ReviewCount int     `db:"review_count" json:"reviewCount"`
 	AvgScore    float64 `db:"avg_score" json:"avgScore"`
 }
+
+// intは環境依存で最大値が異なるので数が大きくなる可能性のあるIDはint64を使う
