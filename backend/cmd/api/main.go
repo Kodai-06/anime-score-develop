@@ -75,6 +75,9 @@ func main() {
 		// 特定のアニメのレビュー取得エンドポイント (GET /api/reviews?animeId=xxx)
 		api.GET("/reviews", reviewHandler.ListByAnime)
 
+		// アニメ詳細取得エンドポイント (GET /api/animes/:id)
+		api.GET("/animes/:id", animeHandler.GetDetail)
+
 		// 認証が必要なエンドポイント
 		authorized := api.Group("")
 		authorized.Use(middleware.AuthMiddleware())

@@ -77,3 +77,44 @@ func (r *AnimeRepository) FindByAnnictID(annictID int) (*models.Anime, error) {
 
 	return &anime, nil
 }
+
+// FindByIDWithStats はIDを使ってアニメ情報とその統計情報を取得する
+// FindByIDWithStats はアニメID(内部ID)を使ってDBからアニメと統計情報を一度に取得
+func (r *AnimeRepository) FindByIDWithStats(id int64) (*models.Anime, *models.AnimeStats, error) {
+	// LEFT JOINを使うことで、レビューがないアニメでも取得可能
+	// COALESCEはリストの中から、最初に『NULLではない』値を返す関数
+	// COALESCEを使って、統計情報がNULLの場合は0を返すようにしている
+	query := `
+        SELECT 
+            a.id, a.annict_id, a.title, a.year, a.image_url, a.created_at,
+            COALESCE(s.review_count, 0) as review_count,
+            COALESCE(s.avg_score, 0) as avg_score
+        FROM animes a
+        LEFT JOIN anime_stats s ON a.id = s.anime_id
+        WHERE a.id = $1
+    `
+
+	var anime models.Anime
+	var stats models.AnimeStats
+	err := r.db.QueryRow(query, id).Scan(
+		&anime.ID,
+		&anime.AnnictID,
+		&anime.Title,
+		&anime.Year,
+		&anime.ImageURL,
+		&anime.CreatedAt,
+		&stats.ReviewCount,
+		&stats.AvgScore,
+	)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil, nil // アニメが見つからない場合
+		}
+		return nil, nil, fmt.Errorf("failed to find anime with stats: %w", err)
+	}
+
+	stats.AnimeID = anime.ID // 統計情報にアニメIDを紐付ける
+
+	return &anime, &stats, nil
+}

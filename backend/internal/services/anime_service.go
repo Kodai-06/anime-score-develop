@@ -93,3 +93,14 @@ func (s *AnimeService) FindOrCreateAnime(annictID int) (*models.Anime, error) {
 
 	return newAnime, nil
 }
+
+// アニメ情報と統計情報を取得する関数
+func (s *AnimeService) GetAnimeDetail(id int64) (*models.Anime, *models.AnimeStats, error) {
+	// アニメ情報と統計情報を取得
+	anime, stats, err := s.animeRepo.FindByIDWithStats(id)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return anime, stats, nil
+}

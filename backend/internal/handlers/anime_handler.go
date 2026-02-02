@@ -12,14 +12,14 @@ type AnimeHandler struct {
 	service *services.AnimeService
 }
 
-// NewAnimeHandler はハンドラのインスタンスを生成します
+// NewAnimeHandler はハンドラのインスタンスを生成
 func NewAnimeHandler(service *services.AnimeService) *AnimeHandler {
 	return &AnimeHandler{
 		service: service,
 	}
 }
 
-// Search は /api/animes/search へのリクエストを処理します
+// Search は /api/animes/search へのリクエストを処理
 func (h *AnimeHandler) Search(c *gin.Context) {
 	// 1. クエリパラメータの取得
 	// URL: /api/animes/search?q=ガンダム&limit=20&cursor=xxx
@@ -54,5 +54,28 @@ func (h *AnimeHandler) Search(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"data":       works,
 		"nextCursor": nextCursor,
+	})
+}
+
+// GetDetail は /api/animes/:id へのリクエストを処理
+func (h *AnimeHandler) GetDetail(c *gin.Context) {
+	// ID をパスパラメータから取得
+	idStr := c.Param("id")
+	annictID, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid anime ID"})
+		return
+	}
+
+	// Service を呼び出してレスポンスを返す
+	anime, stats, err := h.service.GetAnimeDetail(int64(annictID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get anime details"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"anime": anime,
+		"stats": stats,
 	})
 }

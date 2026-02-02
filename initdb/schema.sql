@@ -31,12 +31,15 @@ CREATE TABLE reviews (
 );
 
 --  インデックス (クエリパフォーマンス向上)
+-- インデックスはinsertやupdateが遅くなる
 CREATE INDEX idx_reviews_user_id ON reviews(user_id);
 CREATE INDEX idx_reviews_anime_id ON reviews(anime_id);
 CREATE INDEX idx_animes_title ON animes(title);
 CREATE INDEX idx_animes_annictId ON animes(annictId);
 
 --  アニメごとの統計情報を表示するビュー
+-- ビューは簡単に言えばよく使う長いクエリをショートカット化するもの
+-- ビューに含まれるORDER BY は必ずしも保証されないのでここで書かない
 CREATE VIEW anime_stats AS
 SELECT 
     anime_id,
