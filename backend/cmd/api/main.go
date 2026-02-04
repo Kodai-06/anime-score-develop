@@ -69,6 +69,9 @@ func main() {
 		api.POST("/signup", authHandler.Signup)
 		api.POST("/login", authHandler.Login)
 
+		// アニメ一覧平均点順取得エンドポイント (GET /api/animes)
+		api.GET("/animes", animeHandler.GetList)
+
 		// アニメ検索エンドポイント (GET /api/animes/search)
 		api.GET("/animes/search", animeHandler.Search)
 

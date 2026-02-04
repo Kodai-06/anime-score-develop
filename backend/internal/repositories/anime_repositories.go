@@ -94,17 +94,17 @@ func (r *AnimeRepository) FindByIDWithStats(id int64) (*models.Anime, *models.An
         WHERE a.id = $1
     `
 
-	var anime models.Anime
-	var stats models.AnimeStats
+	var a models.AnimeWithStats
+
 	err := r.db.QueryRow(query, id).Scan(
-		&anime.ID,
-		&anime.AnnictID,
-		&anime.Title,
-		&anime.Year,
-		&anime.ImageURL,
-		&anime.CreatedAt,
-		&stats.ReviewCount,
-		&stats.AvgScore,
+		&a.ID,
+		&a.AnnictID,
+		&a.Title,
+		&a.Year,
+		&a.ImageURL,
+		&a.CreatedAt,
+		&a.ReviewCount,
+		&a.AvgScore,
 	)
 
 	if err != nil {
@@ -114,7 +114,66 @@ func (r *AnimeRepository) FindByIDWithStats(id int64) (*models.Anime, *models.An
 		return nil, nil, fmt.Errorf("failed to find anime with stats: %w", err)
 	}
 
-	stats.AnimeID = anime.ID // 統計情報にアニメIDを紐付ける
+	return &a.Anime, &models.AnimeStats{
+		AnimeID:     a.ID,
+		ReviewCount: a.ReviewCount,
+		AvgScore:    a.AvgScore,
+	}, nil
+}
 
-	return &anime, &stats, nil
+// FindAllWithStats はアニメ一覧を統計情報付きで取得する
+// 平均点順（降順）でソートし、ページネーションに対応
+func (r *AnimeRepository) FindAllWithStats(limit, offset int) ([]models.AnimeWithStats, int, error) {
+	// 総件数を取得
+	var total int
+	countQuery := `SELECT COUNT(*) FROM animes`
+	if err := r.db.QueryRow(countQuery).Scan(&total); err != nil {
+		return nil, 0, fmt.Errorf("failed to count animes: %w", err)
+	}
+
+	// アニメ一覧を平均点順（降順）で取得
+	// レビューがないアニメは avg_score = 0 として扱う
+	// limitは何件取得するか、offsetは何件飛ばすか
+	query := `
+		SELECT 
+			a.id, a.annict_id, a.title, a.year, a.image_url, a.created_at,
+			COALESCE(s.review_count, 0) as review_count,
+			COALESCE(s.avg_score, 0) as avg_score
+		FROM animes a
+		LEFT JOIN anime_stats s ON a.id = s.anime_id
+		ORDER BY avg_score DESC, review_count DESC, a.created_at DESC
+		LIMIT $1 OFFSET $2
+	`
+
+	rows, err := r.db.Query(query, limit, offset)
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to fetch animes: %w", err)
+	}
+	defer rows.Close()
+
+	var animes []models.AnimeWithStats
+	// 次の行がある限りループ
+	for rows.Next() {
+		var a models.AnimeWithStats
+		err := rows.Scan(
+			&a.ID,
+			&a.AnnictID,
+			&a.Title,
+			&a.Year,
+			&a.ImageURL,
+			&a.CreatedAt,
+			&a.ReviewCount,
+			&a.AvgScore,
+		)
+		if err != nil {
+			return nil, 0, fmt.Errorf("failed to scan anime: %w", err)
+		}
+		animes = append(animes, a)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, 0, fmt.Errorf("rows iteration error: %w", err)
+	}
+
+	return animes, total, nil
 }

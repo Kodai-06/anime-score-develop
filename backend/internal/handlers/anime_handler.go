@@ -79,3 +79,30 @@ func (h *AnimeHandler) GetDetail(c *gin.Context) {
 		"stats": stats,
 	})
 }
+
+// GetList は /api/animes へのリクエストを処理（アニメ一覧取得）
+func (h *AnimeHandler) GetList(c *gin.Context) {
+	// クエリパラメータの取得
+	pageStr := c.DefaultQuery("page", "1")
+	pageSizeStr := c.DefaultQuery("pageSize", "10")
+
+	// 数値に変換
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		page = 1
+	}
+
+	pageSize, err := strconv.Atoi(pageSizeStr)
+	if err != nil {
+		pageSize = 10
+	}
+
+	// Service呼び出し
+	result, err := h.service.GetAnimeList(page, pageSize)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get anime list"})
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
+}

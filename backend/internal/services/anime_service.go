@@ -40,7 +40,7 @@ func (s *AnimeService) SearchAnimes(keyword string, limit int, cursor string) ([
 
 	// 3. 必要に応じたデータ加工（あればここに記述）
 	// 現状は取得したデータをそのまま返しているが、
-	// 将来的には「画像がない場合はデフォルト画像を入れる」などの処理をここに書ける
+	// 将来的には「画像がない場合はデフォルト画像を入れる」などの処理をここに書く
 
 	return works, nextCursor, nil
 }
@@ -103,4 +103,42 @@ func (s *AnimeService) GetAnimeDetail(id int64) (*models.Anime, *models.AnimeSta
 	}
 
 	return anime, stats, nil
+}
+
+// GetAnimeList はアニメ一覧を取得する（平均点順）
+func (s *AnimeService) GetAnimeList(page, pageSize int) (*models.AnimeListResponse, error) {
+	// バリデーション
+	if page < 1 {
+		page = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 10
+	}
+	if pageSize > 50 {
+		pageSize = 50 // 上限
+	}
+
+	// offset計算
+	offset := (page - 1) * pageSize
+
+	// Repository呼び出し
+	animes, total, err := s.animeRepo.FindAllWithStats(pageSize, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	// 総ページ数を計算
+	// int同士の割り算は小数点以下が切り捨てられるので、
+	// (total + pageSize - 1) / pageSize として切り上げをする(天井除算)
+	totalPage := (total + pageSize - 1) / pageSize
+
+	return &models.AnimeListResponse{
+		Data: animes,
+		Pagination: models.Pagination{
+			Page:      page,
+			PageSize:  pageSize,
+			Total:     total,
+			TotalPage: totalPage,
+		},
+	}, nil
 }
