@@ -72,3 +72,8 @@ func (s *ReviewService) GetReviewsByAnimeID(animeID int64) ([]models.Review, err
 func (s *ReviewService) GetReviewsByUserID(userID int64) ([]models.Review, error) {
 	return s.reviewRepo.FindByUserID(userID)
 }
+
+// GetReviewsByUserIDWithAnime は特定ユーザーのレビュー一覧をアニメ情報と共に取得
+func (s *ReviewService) GetReviewsByUserIDWithAnime(userID int64) ([]models.ReviewWithAnime, error) {
+	return s.reviewRepo.FindByUserIDWithAnime(userID)
+}

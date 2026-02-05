@@ -87,6 +87,9 @@ func main() {
 		{
 			// レビュー投稿 (POST /api/reviews)
 			authorized.POST("/reviews", reviewHandler.Create)
+
+			// マイページ用エンドポイント (GET /api/me/reviews)
+			authorized.GET("/me/reviews", reviewHandler.ListByMe)
 		}
 	}
 

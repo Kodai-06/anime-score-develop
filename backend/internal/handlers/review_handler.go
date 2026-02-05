@@ -89,3 +89,27 @@ func (h *ReviewHandler) ListByAnime(c *gin.Context) {
 	})
 
 }
+
+// 自分のレビュー一覧を取得するハンドラー
+func (h *ReviewHandler) ListByMe(c *gin.Context) {
+
+	// 1. 認証ミドルウェアでセットされたユーザーIDを取得
+	userIDValue, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "認証が必要です"})
+		return
+	}
+	userID := int64(userIDValue.(int)) //interface{} を直接別の型に変換することはできないのでintであることを確認してからint64に変換
+
+	// 2. サービス層でレビュー一覧をアニメ情報と共に取得
+	reviews, err := h.service.GetReviewsByUserIDWithAnime(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get reviews"})
+		return
+	}
+
+	// 3. 成功レスポンス
+	c.JSON(http.StatusOK, gin.H{
+		"data": reviews,
+	})
+}
