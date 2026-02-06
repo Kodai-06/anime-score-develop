@@ -20,25 +20,25 @@ func NewAuthService(repo *repositories.UserRepository) *AuthService {
 }
 
 // Signup: ユーザー登録ロジック
-func (s *AuthService) Signup(input models.SignUpInput) (*models.User, error) {
+func (s *AuthService) Signup(input models.SignUpInput) (*models.User, string, error) {
 	// 1. ユーザー名のバリデーション（英数字と記号のみ）
 	if !models.ValidateUsername(input.Username) {
-		return nil, errors.New("ユーザー名は3〜50文字までで英数字とアンダースコア(_)、ハイフン(-)のみ使用できます")
+		return nil, "", errors.New("ユーザー名は3〜50文字までで英数字とアンダースコア(_)、ハイフン(-)のみ使用できます")
 	}
 
 	// 2. ユーザー名の重複チェック
 	exists, err := s.repo.ExistsByUsername(input.Username)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	if exists {
-		return nil, errors.New("このユーザー名は既に使用されています")
+		return nil, "", errors.New("このユーザー名は既に使用されています")
 	}
 
 	// 3. パスワードをハッシュ化
 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	// 4. ユーザーモデル作成
@@ -50,10 +50,23 @@ func (s *AuthService) Signup(input models.SignUpInput) (*models.User, error) {
 
 	// 5. DBに保存
 	if err := s.repo.Create(user); err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
-	return user, nil
+	// 6. ユーザー登録時にJWTトークンを生成
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"user_id": user.ID,
+		"exp":     time.Now().Add(time.Hour * 72).Unix(), // 72時間有効
+	})
+
+	// 秘密鍵で署名（環境変数から読み込む）
+	secret_key := os.Getenv("JWT_SECRET_KEY")
+	tokenString, err := token.SignedString([]byte(secret_key))
+	if err != nil {
+		return nil, "", err
+	}
+
+	return user, tokenString, nil
 }
 
 // Login: ログインロジック（JWTトークンを返す）

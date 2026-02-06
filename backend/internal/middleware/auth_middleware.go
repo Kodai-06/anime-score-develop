@@ -3,7 +3,6 @@ package middleware
 import (
 	"fmt"
 	"net/http"
-	"strings"
 
 	"os"
 
@@ -14,24 +13,13 @@ import (
 // 認証ミドルウェア
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// 1. ヘッダーからAuthorizationを取得
-		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is required"})
+		// 1. クッキーからトークンを取得
+		tokenString, err := c.Cookie("auth_token")
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication token is required"})
 			c.Abort() // 処理をここで止める
 			return
 		}
-
-		// 2. "Bearer <token>" の形式かチェックし、トークン部分だけ取り出す
-		// Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-		parts := strings.Split(authHeader, " ")
-		// トークンが形式通りでない場合
-		if len(parts) != 2 || parts[0] != "Bearer" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid authorization format"})
-			c.Abort()
-			return
-		}
-		tokenString := parts[1]
 
 		// 3. トークンの検証
 		// ※ Login時と同じシークレットキーを使うこと！
@@ -40,6 +28,7 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
 			// アルゴリズムがHMACかどうか確認（セキュリティ対策）
+			// 型アサーション
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 			}

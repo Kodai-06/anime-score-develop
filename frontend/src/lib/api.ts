@@ -15,26 +15,6 @@ import type {
 // ========== 設定 ==========
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
-// ========== トークン管理 ==========
-const TOKEN_KEY = "auth_token";
-
-export function getToken(): string | null {
-  if (typeof window === "undefined") return null; // SSRを行うフレームワークの場合サーバーにはwindowがないため
-  return localStorage.getItem(TOKEN_KEY);
-}
-
-export function setToken(token: string): void {
-  localStorage.setItem(TOKEN_KEY, token);
-}
-
-export function removeToken(): void {
-  localStorage.removeItem(TOKEN_KEY);
-}
-
-export function isLoggedIn(): boolean {
-  return !!getToken(); //!!でbooleanに変換
-}
-
 // ========== Fetch ラッパー ==========
 class ApiClient {
   private baseUrl: string;
@@ -54,18 +34,9 @@ class ApiClient {
       ...options.headers, //スプレッド構文でオプションのヘッダーを展開(オプションがあればそれを優先するため最後に配置)
     };
 
-    // 認証トークンがあれば付与
-    // headersという変数をRecord<string, string>型にキャストしてから使う(型アサーション)
-    // HeadersInit型はRecord<string, string>以外にもなりうるので
-    // 文字列のキーと文字列の値を持つオブジェクトであることをTypeScriptに伝える
-    // 辞書としてブラケット[]でアクセスしている
-    const token = getToken();
-    if (token) {
-      (headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
-    }
-
     const response = await fetch(url, {
       ...options,
+      credentials: 'include', //ブラウザはデフォルトでは別ドメインへのリクエストにクッキーを送信しないため、これを有効にする
       headers,
     });
 
@@ -115,14 +86,13 @@ export async function signup(input: SignUpInput): Promise<SignUpResponse> {
 
 export async function login(input: LoginInput): Promise<LoginResponse> {
   const response = await api.post<LoginResponse>("/api/login", input);
-  // ログイン成功時にトークンを保存
-  setToken(response.token);
+  
   return response;
 }
 
-export function logout(): void {
-  removeToken();
-}
+// export function logout(): void {
+     // 後で実装
+// }
 
 // ========== Anime API ==========
 export async function getAnimeList(
