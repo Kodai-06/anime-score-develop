@@ -43,6 +43,9 @@ func main() {
 	// Ginルーターのセットアップ
 	r := gin.Default()
 
+	// CORSミドルウェアの適用
+	r.Use(middleware.CORSMiddleware())
+
 	// 依存関係の注入 (DI)
 
 	// 認証関連
