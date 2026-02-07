@@ -11,7 +11,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"anime-score-backend/internal/handlers"
-	"anime-score-backend/internal/middleware"
+	"anime-score-backend/internal/middlewares"
 	"anime-score-backend/internal/repositories"
 	"anime-score-backend/internal/services"
 )
@@ -44,7 +44,7 @@ func main() {
 	r := gin.Default()
 
 	// CORSミドルウェアの適用
-	r.Use(middleware.CORSMiddleware())
+	r.Use(middlewares.CORSMiddleware())
 
 	// 依存関係の注入 (DI)
 
@@ -86,7 +86,7 @@ func main() {
 
 		// 認証が必要なエンドポイント
 		authorized := api.Group("")
-		authorized.Use(middleware.AuthMiddleware())
+		authorized.Use(middlewares.AuthMiddleware())
 		{
 			// レビュー投稿 (POST /api/reviews)
 			authorized.POST("/reviews", reviewHandler.Create)

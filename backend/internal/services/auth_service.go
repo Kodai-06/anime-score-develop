@@ -75,17 +75,17 @@ func (s *AuthService) Signup(input models.SignUpInput) (*models.User, string, er
 // Payload（ペイロード）: ユーザーIDや有効期限などのデータ(暗号化されていないので機密情報は入れないこと)
 // Signature（署名）: シークレットキーを使って生成された暗号データ
 // で構成される
-func (s *AuthService) Login(input models.LoginInput) (string, error) {
+func (s *AuthService) Login(input models.LoginInput) (*models.User, string, error) {
 	// 1. Emailでユーザー検索
 	user, err := s.repo.GetByEmail(input.Email)
 	if err != nil {
-		return "", errors.New("ユーザーが見つかりません")
+		return nil, "", errors.New("ユーザーが見つかりません")
 	}
 
 	// 2. パスワード照合 (ハッシュ同士を比較)
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(input.Password))
 	if err != nil {
-		return "", errors.New("パスワードが間違っています")
+		return nil, "", errors.New("パスワードが間違っています")
 	}
 
 	// 3. JWTトークンの生成
@@ -98,8 +98,8 @@ func (s *AuthService) Login(input models.LoginInput) (string, error) {
 	secret_key := os.Getenv("JWT_SECRET_KEY")
 	tokenString, err := token.SignedString([]byte(secret_key))
 	if err != nil {
-		return "", err
+		return nil, "", err
 	}
 
-	return tokenString, nil
+	return user, tokenString, nil
 }

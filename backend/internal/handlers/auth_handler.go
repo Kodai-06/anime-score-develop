@@ -66,7 +66,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := h.service.Login(input)
+	user, token, err := h.service.Login(input)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
@@ -76,5 +76,5 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	h.setAuthCookie(c, token)
 
 	// 3. レスポンスボディにはトークンを含めず、成功メッセージのみ返す
-	c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
+	c.JSON(http.StatusOK, gin.H{"message": "Login successful", "user": user})
 }
