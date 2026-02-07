@@ -3,6 +3,7 @@ import type {
   SignUpResponse,
   LoginInput,
   LoginResponse,
+  GetMeResponse,
   AnimeListResponse,
   AnimeSearchResponse,
   AnimeDetailResponse,
@@ -90,9 +91,13 @@ export async function login(input: LoginInput): Promise<LoginResponse> {
   return response;
 }
 
-// export function logout(): void {
-     // 後で実装
-// }
+export async function logout(): Promise<void> {
+  await api.post<void>("/api/logout");
+}
+
+export async function getCurrentUser(): Promise<GetMeResponse> {
+  return api.get<GetMeResponse>("/api/me");
+}
 
 // ========== Anime API ==========
 export async function getAnimeList(

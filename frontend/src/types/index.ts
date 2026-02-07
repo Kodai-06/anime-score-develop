@@ -24,7 +24,12 @@ export interface SignUpResponse {
 }
 
 export interface LoginResponse {
-  token: string;
+  message: string;
+  user: User;
+}
+
+export interface GetMeResponse {
+  user: User;
 }
 
 // ========== Anime ==========
