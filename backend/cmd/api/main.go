@@ -93,6 +93,9 @@ func main() {
 
 			// マイページ用エンドポイント (GET /api/me/reviews)
 			authorized.GET("/me/reviews", reviewHandler.ListByMe)
+
+			// ログアウトエンドポイント (POST /api/logout)
+			authorized.POST("/logout", authHandler.Logout)
 		}
 	}
 

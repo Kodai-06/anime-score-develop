@@ -78,3 +78,18 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	// 3. レスポンスボディにはトークンを含めず、成功メッセージのみ返す
 	c.JSON(http.StatusOK, gin.H{"message": "Login successful", "user": user})
 }
+
+// Logout ハンドラー
+func (h *AuthHandler) Logout(c *gin.Context) {
+	// クッキーの有効期限を過去に設定して削除
+	c.SetCookie(
+		"auth_token", // cookie名
+		"",           // 値を空に
+		-1,           // 有効期限を過去に設定
+		"/",          // パス
+		"",           // ドメイン
+		false,        // Secure
+		true,         // HttpOnly
+	)
+	c.JSON(http.StatusOK, gin.H{"message": "Logout successful"})
+}
