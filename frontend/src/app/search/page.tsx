@@ -13,8 +13,10 @@ export default function SearchPage() {
   const [keyword, setKeyword] = useState("");
   const [results, setResults] = useState<AnnictWork[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,15 +25,35 @@ export default function SearchPage() {
     setIsLoading(true);
     setError(null);
     setHasSearched(true);
+    setNextCursor(null);
 
     try {
-      const response = await searchAnimes(keyword);
+      const response = await searchAnimes(keyword, 15);
       setResults(response.data || []);
+      setNextCursor(response.nextCursor);
     } catch (err) {
       setError("検索に失敗しました");
       console.error(err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleLoadMore = async () => {
+    if (!nextCursor || isLoadingMore) return;
+
+    setIsLoadingMore(true);
+    setError(null);
+
+    try {
+      const response = await searchAnimes(keyword, 15, nextCursor);
+      setResults((prev) => [...prev, ...(response.data || [])]);
+      setNextCursor(response.nextCursor);
+    } catch (err) {
+      setError("追加の読み込みに失敗しました");
+      console.error(err);
+    } finally {
+      setIsLoadingMore(false);
     }
   };
 
@@ -97,6 +119,19 @@ export default function SearchPage() {
                     </Card>
                   </Link>
                 ))}
+                
+                {/* もっと読み込むボタン */}
+                {nextCursor && (
+                  <div className="text-center pt-4">
+                    <Button
+                      variant="outline"
+                      onClick={handleLoadMore}
+                      disabled={isLoadingMore}
+                    >
+                      {isLoadingMore ? "読み込み中..." : "もっと見る"}
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </>
