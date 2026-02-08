@@ -7,13 +7,43 @@ services:
     container_name: anime_db
     ports:
       - "5432:5432" # ホストのポート:コンテナのポート
-    environment:
+    environment: # 環境変数
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB} # 作成するデータベース名
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./initdb:/docker-entrypoint-initdb.d # initdbフォルダにあるテーブル設計を適用
+
+  # バックエンド (Go + Gin)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: anime_backend
+    ports:
+      - "8080:8080"
+    environment: # 環境変数
+      DSN: ${DSN}
+      PORT: ${PORT}
+      FRONTEND_URL: ${FRONTEND_URL}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      ANNICT_ACCESS_TOKEN: ${ANNICT_ACCESS_TOKEN}
+    depends_on:
+      - db
+
+  # フロントエンド (Next.js)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: anime_frontend
+    ports:
+      - "3000:3000"
+    environment: # 環境変数
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+    depends_on:
+      - backend
 
 #   # データベース管理ツール (PgAdmin) - オプションですがあると便利です
 #   pgadmin:
@@ -27,5 +57,5 @@ services:
 #     depends_on:
 #       - db
 
-# volumes:
-#   postgres_data:
+volumes:
+  postgres_data:

@@ -39,7 +39,7 @@ export default function Home() {
       <Header />
 
       <main className="container mx-auto px-4 py-8">
-        <h1 className="mb-6 text-2xl font-bold">アニメ一覧</h1>
+        <h1 className="mb-6 text-2xl font-bold">アニメ一覧(平均点順)</h1>
 
         {/* ローディング */}
         {isLoading && (
@@ -62,7 +62,7 @@ export default function Home() {
               <div className="text-center py-12">
                 <p className="text-gray-500">まだアニメがありません</p>
                 <Link href="/search" className="text-primary hover:underline mt-2 inline-block">
-                  アニメを検索して追加しましょう
+                  アニメを検索してレビューをしよう
                 </Link>
               </div>
             ) : (
