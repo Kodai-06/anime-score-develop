@@ -95,9 +95,9 @@ export async function logout(): Promise<void> {
   await api.post<void>("/api/logout");
 }
 
-export async function getCurrentUser(): Promise<GetMeResponse> {
-  return api.get<GetMeResponse>("/api/me");
-}
+// export async function getCurrentUser(): Promise<GetMeResponse> {
+//   return api.get<GetMeResponse>("/api/me");
+// }
 
 // ========== Anime API ==========
 export async function getAnimeList(
