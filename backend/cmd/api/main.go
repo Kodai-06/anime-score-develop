@@ -75,7 +75,7 @@ func main() {
 		// アニメ一覧平均点順取得エンドポイント (GET /api/animes)
 		api.GET("/animes", animeHandler.GetList)
 
-		// アニメ検索エンドポイント (GET /api/animes/search)
+		// アニメ検索エンドポイント (GET /api/animes/search?q=xxx&limit=20&cursor=xxx)
 		api.GET("/animes/search", animeHandler.Search)
 
 		// 特定のアニメのレビュー取得エンドポイント (GET /api/reviews?animeId=xxx)

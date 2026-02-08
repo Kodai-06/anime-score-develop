@@ -18,7 +18,7 @@ export default function SearchPage() {
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!keyword.trim()) return;
+    if (!keyword.trim()) return; // 空のキーワードは無視,trim()で前後の空白を削除
 
     setIsLoading(true);
     setError(null);

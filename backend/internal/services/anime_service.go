@@ -95,9 +95,16 @@ func (s *AnimeService) FindOrCreateAnime(annictID int) (*models.Anime, error) {
 }
 
 // アニメ情報と統計情報を取得する関数
-func (s *AnimeService) GetAnimeDetail(id int64) (*models.Anime, *models.AnimeStats, error) {
-	// アニメ情報と統計情報を取得
-	anime, stats, err := s.animeRepo.FindByIDWithStats(id)
+// 詳細ページ表示時にDBに保存する（なければAnnict APIから取得して保存）
+func (s *AnimeService) GetAnimeDetail(annictID int64) (*models.Anime, *models.AnimeStats, error) {
+	// 1. DBになければAnnict APIから取得してDB保存
+	anime, err := s.FindOrCreateAnime(int(annictID))
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// 2. 統計情報を取得（anime.ID = DBの内部ID）
+	_, stats, err := s.animeRepo.FindByIDWithStats(anime.ID)
 	if err != nil {
 		return nil, nil, err
 	}

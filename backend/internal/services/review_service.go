@@ -23,7 +23,7 @@ func NewReviewService(
 }
 
 // CreateReview はレビューを投稿する
-// 1. アニメがDBになければAnnict APIから取得して保存
+// 1. アニメがDBに存在するか確認（詳細ページ表示時に保存済みのはず）
 // 2. 既に同じユーザーが同じアニメにレビューしていないかチェック
 // 3. レビューを保存
 func (s *ReviewService) CreateReview(userID int64, input models.ReviewInput) (*models.Review, error) {
@@ -32,7 +32,8 @@ func (s *ReviewService) CreateReview(userID int64, input models.ReviewInput) (*m
 		return nil, errors.New("スコアは0〜100の範囲で入力してください")
 	}
 
-	// 2. アニメをDBから探す、なければAnnict APIから取得してDB保存
+	// 2. アニメをDBから探す（詳細ページ表示時に保存済みのはず）
+	// 見つからない場合はAnnict APIから取得して保存（フォールバック）
 	anime, err := s.animeService.FindOrCreateAnime(input.AnnictID)
 	if err != nil {
 		return nil, err
