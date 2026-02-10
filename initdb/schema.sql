@@ -10,7 +10,7 @@ CREATE TABLE users (
 --  Animesテーブル (Annict APIデータのキャッシュ)
 CREATE TABLE animes (
     id SERIAL PRIMARY KEY,
-    annictId INTEGER UNIQUE NOT NULL,   -- Annict API の作品ID
+    annict_id INTEGER UNIQUE NOT NULL,   -- Annict API の作品ID
     title VARCHAR(255) NOT NULL,
     year INTEGER NOT NULL,              -- 放送年 (例: 2024)
     image_url VARCHAR(500),             -- 作品画像URL (Annict APIから取得)
@@ -35,7 +35,7 @@ CREATE TABLE reviews (
 CREATE INDEX idx_reviews_user_id ON reviews(user_id);
 CREATE INDEX idx_reviews_anime_id ON reviews(anime_id);
 CREATE INDEX idx_animes_title ON animes(title);
-CREATE INDEX idx_animes_annictId ON animes(annictId);
+CREATE INDEX idx_animes_annict_id ON animes(annict_id);
 
 --  アニメごとの統計情報を表示するビュー
 -- ビューは簡単に言えばよく使う長いクエリをショートカット化するもの
