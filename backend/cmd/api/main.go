@@ -78,6 +78,9 @@ func main() {
 		// アニメ検索エンドポイント (GET /api/animes/search?q=xxx&limit=20&cursor=xxx)
 		api.GET("/animes/search", animeHandler.Search)
 
+		// 新着レビュー一覧取得エンドポイント (GET /api/reviews/recent)
+		api.GET("/reviews/recent", reviewHandler.ListRecent)
+
 		// 特定のアニメのレビュー取得エンドポイント (GET /api/reviews?animeId=xxx)
 		api.GET("/reviews", reviewHandler.ListByAnime)
 

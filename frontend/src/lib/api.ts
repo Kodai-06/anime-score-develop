@@ -144,3 +144,7 @@ export async function createReview(
 export async function getMyReviews(): Promise<MyReviewListResponse> {
   return api.get<MyReviewListResponse>("/api/me/reviews");
 }
+
+export async function getRecentReviews(): Promise<ReviewListResponse> {
+  return api.get<ReviewListResponse>("/api/reviews/recent");
+}

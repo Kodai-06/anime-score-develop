@@ -133,3 +133,30 @@ func (r *ReviewRepository) FindByUserIDWithAnime(userID int64) ([]models.ReviewW
 
 	return reviews, nil
 }
+
+// レビューをアニメ情報とともに20件新着順に取得する
+func (r *ReviewRepository) FindAllWithAnime() ([]models.ReviewWithAnime, error) {
+	query := `
+		SELECT
+			r.id,
+			r.user_id,
+			r.anime_id,
+			r.score,
+			r.comment,
+			r.created_at,
+			a.title AS anime_title,
+			a.year AS anime_year,
+			a.image_url AS anime_image_url
+		FROM reviews r
+		INNER JOIN animes a ON r.anime_id = a.id
+		ORDER BY r.created_at DESC
+		LIMIT 20
+	`
+	var reviews []models.ReviewWithAnime
+	err := r.db.Select(&reviews, query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find reviews with anime: %w", err)
+	}
+
+	return reviews, nil
+}

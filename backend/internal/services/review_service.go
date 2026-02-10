@@ -78,3 +78,8 @@ func (s *ReviewService) GetReviewsByUserID(userID int64) ([]models.Review, error
 func (s *ReviewService) GetReviewsByUserIDWithAnime(userID int64) ([]models.ReviewWithAnime, error) {
 	return s.reviewRepo.FindByUserIDWithAnime(userID)
 }
+
+// レビューをアニメ情報とともに20件新着順に取得
+func (s *ReviewService) GetReviewsByAnimeIDWithAnime() ([]models.ReviewWithAnime, error) {
+	return s.reviewRepo.FindAllWithAnime()
+}

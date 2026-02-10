@@ -113,3 +113,18 @@ func (h *ReviewHandler) ListByMe(c *gin.Context) {
 		"data": reviews,
 	})
 }
+
+// 新着レビュー一覧を取得するハンドラー
+func (h *ReviewHandler) ListRecent(c *gin.Context) {
+
+	// 1. サービス層でレビュー一覧をアニメ情報と共に取得
+	reviews, err := h.service.GetReviewsByAnimeIDWithAnime()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get reviews"})
+		return
+	}
+	// 2. 成功レスポンス
+	c.JSON(http.StatusOK, gin.H{
+		"data": reviews,
+	})
+}
