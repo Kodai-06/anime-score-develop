@@ -28,6 +28,9 @@ export function Header() {
           <Link href="/search" className="text-sm hover:text-primary">
             検索
           </Link>
+          <Link href="/animes" className="text-sm hover:text-primary">
+            アニメ(平均点順)
+          </Link>
 
           {isLoading ? (
             <span className="text-sm text-gray-400">読み込み中...</span>
