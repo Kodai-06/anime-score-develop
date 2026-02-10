@@ -129,7 +129,7 @@ export default function MyPage() {
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <Link
-                            href={`/animes/${review.animeId}`}
+                            href={`/animes/${review.animeAnnictId}`}
                             className="font-medium hover:text-primary"
                           >
                             {review.animeTitle}

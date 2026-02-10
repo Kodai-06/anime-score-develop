@@ -116,6 +116,7 @@ func (r *ReviewRepository) FindByUserIDWithAnime(userID int64) ([]models.ReviewW
 			r.score,
 			r.comment,
 			r.created_at,
+			a.annict_id AS anime_annict_id,
 			a.title AS anime_title,
 			a.year AS anime_year,
 			a.image_url AS anime_image_url
@@ -144,6 +145,7 @@ func (r *ReviewRepository) FindAllWithAnime() ([]models.ReviewWithAnime, error) 
 			r.score,
 			r.comment,
 			r.created_at,
+			a.annict_id AS anime_annict_id,
 			a.title AS anime_title,
 			a.year AS anime_year,
 			a.image_url AS anime_image_url

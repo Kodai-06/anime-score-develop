@@ -102,6 +102,7 @@ export interface ReviewInput {
 }
 
 export interface ReviewWithAnime extends Review {
+  animeAnnictId: number;
   animeTitle: string;
   animeYear: number;
   animeImageUrl: string | null;

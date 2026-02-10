@@ -28,6 +28,7 @@ type ReviewWithAnime struct {
 	Comment   *string   `db:"comment" json:"comment"`
 	CreatedAt time.Time `db:"created_at" json:"createdAt"`
 	// アニメ情報
+	AnimeAnnictID int64   `db:"anime_annict_id" json:"animeAnnictId"`
 	Animetitle    string  `db:"anime_title" json:"animeTitle"`
 	AnimeYear     int     `db:"anime_year" json:"animeYear"`
 	AnimeImageURL *string `db:"anime_image_url" json:"animeImageUrl"`
