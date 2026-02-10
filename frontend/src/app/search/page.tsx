@@ -62,10 +62,10 @@ export default function SearchPage() {
       <Header />
 
       <main className="container mx-auto px-4 py-8">
-        <h1 className="mb-6 text-2xl font-bold">アニメ検索</h1>
+        <h1 className="mb-6 text-2xl font-bold text-center">アニメ検索</h1>
 
         {/* 検索フォーム */}
-        <form onSubmit={handleSearch} className="mb-8 flex gap-2">
+        <form onSubmit={handleSearch} className="mb-8 flex justify-center gap-2">
           <Input
             type="text"
             value={keyword}
