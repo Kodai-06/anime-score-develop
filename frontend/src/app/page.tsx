@@ -4,42 +4,48 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { getAnimeList } from "@/lib/api";
-import type { AnimeWithStats } from "@/types";
+import { getRecentReviews } from "@/lib/api";
+import type { ReviewWithAnime } from "@/types";
 
 export default function Home() {
-  const [animes, setAnimes] = useState<AnimeWithStats[]>([]);
-  const [page, setPage] = useState(1);
-  const [totalPage, setTotalPage] = useState(1);
+  const [reviews, setReviews] = useState<ReviewWithAnime[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // アニメ一覧を取得
+  // レビュー新着順を取得
   useEffect(() => {
-    const fetchAnimes = async () => {
+    const fetchReviews = async () => {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await getAnimeList(page, 12);
-        setAnimes(response.data || []);
-        setTotalPage(response.pagination.totalPage);
+        const response = await getRecentReviews();
+        setReviews(response.data || []);
       } catch (err) {
-        setError("アニメの取得に失敗しました");
+        setError("レビューの取得に失敗しました");
         console.error(err);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchAnimes();
-  }, [page]);
+    fetchReviews();
+  }, []);
+
+  // 日付フォーマット
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("ja-JP", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
 
       <main className="container mx-auto px-4 py-8">
-        <h1 className="mb-6 text-2xl font-bold">アニメ一覧(平均点順)</h1>
+        <h1 className="mb-6 text-2xl font-bold">新着レビュー</h1>
 
         {/* ローディング */}
         {isLoading && (
@@ -55,63 +61,45 @@ export default function Home() {
           </div>
         )}
 
-        {/* アニメ一覧 */}
+        {/* レビュー一覧 */}
         {!isLoading && !error && (
           <>
-            {animes.length === 0 ? (
+            {reviews.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-500">まだアニメがありません</p>
+                <p className="text-gray-500">まだレビューがありません</p>
                 <Link href="/search" className="text-primary hover:underline mt-2 inline-block">
                   アニメを検索してレビューをしよう
                 </Link>
               </div>
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {animes.map((anime) => (
-                  <Link key={anime.id} href={`/animes/${anime.annictId}`}>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {reviews.map((review) => (
+                  <Link key={review.id} href={`/animes/${review.animeAnnictId}`}>
                     <Card className="h-full hover:shadow-md transition-shadow cursor-pointer">
                       <CardHeader className="pb-2">
                         <CardTitle className="text-base line-clamp-2">
-                          {anime.title}
+                          {review.animeTitle}
                         </CardTitle>
+                        <p className="text-sm text-gray-500">{review.animeYear}年</p>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-sm text-gray-500">{anime.year}年</p>
-                        <div className="mt-2 flex items-center gap-4">
+                        <div className="flex items-center gap-2 mb-2">
                           <span className="text-lg font-bold text-primary">
-                            {anime.avgScore ? `${anime.avgScore}点` : "- 点"}
-                          </span>
-                          <span className="text-sm text-gray-500">
-                            {anime.reviewCount}件のレビュー
+                            {review.score}点
                           </span>
                         </div>
+                        {review.comment && (
+                          <p className="text-sm text-gray-600 line-clamp-3">
+                            {review.comment}
+                          </p>
+                        )}
+                        <p className="text-xs text-gray-400 mt-2">
+                          {formatDate(review.createdAt)}
+                        </p>
                       </CardContent>
                     </Card>
                   </Link>
                 ))}
-              </div>
-            )}
-
-            {/* ページネーション */}
-            {totalPage > 1 && (
-              <div className="mt-8 flex justify-center gap-2">
-                <Button
-                  variant="outline"
-                  disabled={page === 1}
-                  onClick={() => setPage(page - 1)}
-                >
-                  前へ
-                </Button>
-                <span className="flex items-center px-4">
-                  {page} / {totalPage}
-                </span>
-                <Button
-                  variant="outline"
-                  disabled={page === totalPage}
-                  onClick={() => setPage(page + 1)}
-                >
-                  次へ
-                </Button>
               </div>
             )}
           </>
