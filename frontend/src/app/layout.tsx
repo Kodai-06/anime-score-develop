@@ -16,6 +16,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "AnimeScore - アニメレビューサイト",
   description: "アニメ作品にスコアとコメントを投稿できるレビューサイト",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({
