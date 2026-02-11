@@ -4,6 +4,7 @@ import (
 	"anime-score-backend/internal/models"
 	"anime-score-backend/internal/services"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,6 +24,10 @@ func (h *AuthHandler) setAuthCookie(c *gin.Context, token string) {
 	// c.SetCookieを呼ぶ「前」に設定する必要がある
 	// laxモードは、外部サイトからのGETリクエスト以外にはクッキーを送信しない
 	c.SetSameSite(http.SameSiteLaxMode) // または http.SameSiteStrictMode
+
+	// 環境変数でSecureフラグを判定（本番ではHTTPS必須）
+	isProduction := os.Getenv("ENV") == "production"
+
 	// 2. クッキーにトークンをセット
 	// c.SetCookie(name, value, maxAge, path, domain, secure, httpOnly)
 	c.SetCookie(
@@ -31,7 +36,7 @@ func (h *AuthHandler) setAuthCookie(c *gin.Context, token string) {
 		3600*24,      // 有効期限（秒）: ここでは24時間
 		"/",          // パス: サイト全体で有効
 		"",           // ドメイン: 空文字だと現在のドメインのみ
-		false,        // Secure: localhost開発時はfalse, 本番(HTTPS)はtrueにする
+		isProduction, // Secure: ENV=productionのときtrue
 		true,         // HttpOnly: JavaScriptからのアクセス禁止（必須）
 	)
 }
@@ -81,6 +86,9 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 // Logout ハンドラー
 func (h *AuthHandler) Logout(c *gin.Context) {
+	// 環境変数でSecureフラグを判定
+	isProduction := os.Getenv("ENV") == "production"
+
 	// クッキーの有効期限を過去に設定して削除
 	c.SetCookie(
 		"auth_token", // cookie名
@@ -88,7 +96,7 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 		-1,           // 有効期限を過去に設定
 		"/",          // パス
 		"",           // ドメイン
-		false,        // Secure
+		isProduction, // Secure: ENV=productionのときtrue
 		true,         // HttpOnly
 	)
 	c.JSON(http.StatusOK, gin.H{"message": "Logout successful"})
