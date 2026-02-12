@@ -111,7 +111,7 @@ func main() {
 	})
 
 	// サーバー起動
-	port := os.Getenv("PORT")
+	port := os.Getenv("PORT_ENV")
 	if port == "" {
 		port = "8080"
 	}
