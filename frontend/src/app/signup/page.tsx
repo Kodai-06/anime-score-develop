@@ -33,6 +33,7 @@ export default function SignupPage() {
   const {
     register,
     handleSubmit,
+    setError: setFieldError,
     formState: { errors, isSubmitting },
   } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
@@ -45,7 +46,11 @@ export default function SignupPage() {
       router.push("/");
     } catch (err) {
       if (err instanceof ApiError) {
-        setError(err.message);
+        if (err.message.includes("ユーザー名")) {
+          setFieldError("username", { message: err.message });
+        } else {
+          setError(err.message);
+        }
       } else {
         setError("会員登録に失敗しました");
       }
