@@ -21,9 +21,9 @@ func NewAuthService(repo *repositories.UserRepository) *AuthService {
 
 // Signup: ユーザー登録ロジック
 func (s *AuthService) Signup(input models.SignUpInput) (*models.User, string, error) {
-	// 1. ユーザー名のバリデーション（英数字と記号のみ）
+	// 1. ユーザー名のバリデーション（文字数チェック）
 	if !models.ValidateUsername(input.Username) {
-		return nil, "", errors.New("ユーザー名は3〜50文字までで英数字とアンダースコア(_)、ハイフン(-)のみ使用できます")
+		return nil, "", errors.New("ユーザー名は1〜50文字で入力してください")
 	}
 
 	// 2. ユーザー名の重複チェック

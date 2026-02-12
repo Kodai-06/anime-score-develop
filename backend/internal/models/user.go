@@ -1,7 +1,6 @@
 package models
 
 import (
-	"regexp"
 	"time"
 )
 
@@ -14,16 +13,12 @@ type User struct {
 	CreatedAt    time.Time `db:"created_at" json:"created_at"`
 }
 
-// ユーザー名のバリデーション用正規表現（英数字と記号のみ許可）
-// 許可する記号: _-
-var usernameRegex = regexp.MustCompile(`^[a-zA-Z0-9_\-]+$`)
-
-// ValidateUsername: ユーザー名が有効かチェック
+// ValidateUsername: ユーザー名が有効かチェック（文字数のみ）
 func ValidateUsername(username string) bool {
-	if len(username) < 3 || len(username) > 50 {
+	if len(username) < 1 || len(username) > 50 {
 		return false
 	}
-	return usernameRegex.MatchString(username)
+	return true
 }
 
 // SignUpInput: フロントエンドから送られてくる登録用データ

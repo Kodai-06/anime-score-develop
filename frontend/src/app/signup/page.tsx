@@ -18,8 +18,7 @@ import { ApiError } from "@/lib/api";
 const signupSchema = z.object({
   username: z
     .string()
-    .min(1, "ユーザー名を入力してください")
-    .regex(/^[a-zA-Z0-9_-]+$/, "ユーザー名は英数字、ハイフン、アンダースコアのみ使用できます"),
+    .min(1, "ユーザー名を入力してください"),
   email: z.string().email("有効なメールアドレスを入力してください"),
   password: z.string().min(8, "パスワードは8文字以上で入力してください"),
 });
