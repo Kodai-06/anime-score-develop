@@ -25,10 +25,11 @@ services:
       - "8080:8080"
     environment: # 環境変数
       DSN: ${DSN}
-      PORT: ${PORT}
+      PORT_ENV: ${PORT_ENV}
       FRONTEND_URL: ${FRONTEND_URL}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
       ANNICT_ACCESS_TOKEN: ${ANNICT_ACCESS_TOKEN}
+      ENV: ${ENV}    
     depends_on:
       - db
 
