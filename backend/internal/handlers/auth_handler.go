@@ -52,6 +52,12 @@ func (h *AuthHandler) Signup(c *gin.Context) {
 
 	user, token, err := h.service.Signup(input)
 	if err != nil {
+		// ユーザー名重複・バリデーションエラーはクライアントに内容を返す
+		errMsg := err.Error()
+		if errMsg == "このユーザー名は既に使用されています" || errMsg == "ユーザー名は1〜50文字で入力してください" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": errMsg})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
 	}
