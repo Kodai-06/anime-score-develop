@@ -2,7 +2,7 @@
 
 アニメ作品にスコアとコメントを投稿できるレビューサイト
 
-URL: https://anime-score-develop-141202940381.asia-northeast1.run.app
+URL: https://anime-score-develop.vercel.app
 
 ## 使用技術
 - **フロントエンド**: Next.js(TypeScript)
