@@ -14,7 +14,9 @@ import type {
 } from "@/types";
 
 // ========== 設定 ==========
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+// BFF 経由でバックエンドにアクセスするため、同一オリジン（空文字）を使用
+// BFF が Cookie からトークンを取り出し Authorization: Bearer に乗せ換える
+const API_BASE_URL = "";
 
 // ========== Fetch ラッパー ==========
 class ApiClient {

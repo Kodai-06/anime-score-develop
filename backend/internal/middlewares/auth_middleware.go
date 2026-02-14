@@ -3,8 +3,8 @@ package middlewares
 import (
 	"fmt"
 	"net/http"
-
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -13,12 +13,20 @@ import (
 // 認証ミドルウェア
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// 1. クッキーからトークンを取得
-		tokenString, err := c.Cookie("auth_token")
-		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication token is required"})
-			c.Abort() // 処理をここで止める
-			return
+		// 1. トークンを取得（Authorization ヘッダー → Cookie の優先順）
+		var tokenString string
+		if authHeader := c.GetHeader("Authorization"); strings.HasPrefix(authHeader, "Bearer ") {
+			// BFF からの Bearer トークンを優先
+			tokenString = strings.TrimPrefix(authHeader, "Bearer ")
+		} else {
+			// フォールバック: Cookie からトークンを取得
+			var err error
+			tokenString, err = c.Cookie("auth_token")
+			if err != nil {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication token is required"})
+				c.Abort()
+				return
+			}
 		}
 
 		// 3. トークンの検証

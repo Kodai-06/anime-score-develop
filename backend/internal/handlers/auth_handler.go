@@ -65,8 +65,8 @@ func (h *AuthHandler) Signup(c *gin.Context) {
 	// クッキーにトークンをセット
 	h.setAuthCookie(c, token)
 
-	// レスポンスボディにはトークンを含めず、成功メッセージとユーザー情報のみ返す
-	c.JSON(http.StatusCreated, gin.H{"message": "User created", "user": user})
+	// レスポンスボディにトークンを含める（BFF がトークンを受け取り Cookie に変換する）
+	c.JSON(http.StatusCreated, gin.H{"message": "User created", "user": user, "token": token})
 }
 
 // Login ハンドラー
@@ -86,8 +86,8 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	// 2. クッキーにトークンをセット
 	h.setAuthCookie(c, token)
 
-	// 3. レスポンスボディにはトークンを含めず、成功メッセージのみ返す
-	c.JSON(http.StatusOK, gin.H{"message": "Login successful", "user": user})
+	// 3. レスポンスボディにトークンを含める（BFF がトークンを受け取り Cookie に変換する）
+	c.JSON(http.StatusOK, gin.H{"message": "Login successful", "user": user, "token": token})
 }
 
 // Logout ハンドラー
